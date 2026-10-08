@@ -1,10 +1,14 @@
 # Fynn
 
+[![ci](https://github.com/CarlosCubillos94/fynn/actions/workflows/ci.yml/badge.svg)](https://github.com/CarlosCubillos94/fynn/actions/workflows/ci.yml)
+
 A personal finance app for the phone. Type `uber 4500` or `almuerzo 8000`, and Fynn suggests a category, keeps the ledger on the device, and tells you in plain language how this week compares with the last.
 
 ## Features
 
 - Onboarding and an optional Face ID or fingerprint lock
+- Optional starter plan in onboarding: enter your monthly income and Fynn proposes category budgets as shares of it, leaving part unassigned
+- iOS Shortcuts capture: an App Intent (added by a config plugin) lets an Apple Pay automation queue a payment such as `Jumbo 18500`, which Fynn imports the next time it opens. Needs a development build, not Expo Go
 - Phrase entry, plus a manual form for amount, category, note, and date
 - On-device categorization, with an optional assistant through a proxy that never ships the API key
 - Weekly summary computed from your own transactions
@@ -27,6 +31,21 @@ flowchart LR
   Proxy --> Model[OpenAI-compatible API]
 ```
 
+## Project structure
+
+```text
+app/                 Expo Router screens (tabs, add, onboarding, lock, settings)
+src/features/        Screen implementations by feature (auth, transactions, budgets, insights)
+src/domain/          Pure TypeScript logic: money, phrase categorization, budgets, insights, starter plan
+src/db/              expo-sqlite schema, repository and hooks
+src/services/        Shortcuts capture queue and the optional AI client
+src/components/ui/   Shared UI components (NativeWind)
+plugins/             Expo config plugins for the iOS App Intent and scene lifecycle
+proxy/               Small Node proxy for an OpenAI-compatible API
+```
+
+The domain layer has no React or database imports, so the money math, categorization and budget rules are unit tested in isolation.
+
 ## Run it
 
 ```bash
@@ -42,6 +61,8 @@ npm run typecheck
 npm run lint
 npm run export:web
 ```
+
+Tests cover money parsing and formatting, phrase categorization, budget thresholds, the weekly insight sentence, the starter plan, parsing of the Shortcuts capture queue and the phrase preview component. GitHub Actions runs lint, typecheck and tests on every push.
 
 The first launch is a sample ledger. It is not a real account. Remove it in Settings.
 
