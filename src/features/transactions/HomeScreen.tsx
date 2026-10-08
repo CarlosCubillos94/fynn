@@ -349,7 +349,7 @@ export function HomeScreen() {
                 autoCapitalize="none"
                 autoCorrect={false}
                 accessibilityLabel={copy.addPhrase}
-                style={{ color: colors.onBand, fontSize: 21, minHeight: 52, flex: 1 }}
+                style={{ color: colors.onBand, fontSize: 21, minHeight: 52, flex: 1, minWidth: 0 }}
               />
               {draft ? (
                 <Animated.View style={locked}>
@@ -358,7 +358,7 @@ export function HomeScreen() {
               ) : null}
             </View>
             {draft ? (
-              <Animated.View style={locked} className="gap-2 pb-3 pt-1">
+              <Animated.View style={[{ gap: 8, paddingBottom: 12, paddingTop: 4 }, locked]}>
                 <PhrasePreview
                   draft={draft}
                   color={colors.onBand}

@@ -50,9 +50,16 @@ export function Button({
       }}
     >
       <Animated.View
-        className={compact ? "min-h-11 items-center justify-center px-5" : "min-h-12 items-center justify-center px-4"}
         style={[
-          { backgroundColor: background, opacity: disabled ? 0.45 : 1, borderRadius: compact ? 999 : 12 },
+          {
+            minHeight: compact ? 44 : 48,
+            alignItems: "center",
+            justifyContent: "center",
+            paddingHorizontal: compact ? 20 : 16,
+            backgroundColor: background,
+            opacity: disabled ? 0.45 : 1,
+            borderRadius: compact ? 999 : 12,
+          },
           animated,
         ]}
       >
