@@ -66,9 +66,8 @@ async function openDatabase(): Promise<Database> {
       biometricEnabled: false,
       onboardingCompleted: false,
       defaultCurrency: "CLP",
-      sampleLedger: true,
+      sampleLedger: false,
     });
-    await replaceDemo(db, new Date());
   }
   return db;
 }
@@ -178,6 +177,21 @@ export async function saveBudget(db: Database, budget: Budget): Promise<void> {
     budget.limitMinor,
     budget.month,
   );
+}
+
+export async function resetLedger(db: Database): Promise<void> {
+  await db.execAsync(`
+    DELETE FROM transactions;
+    DELETE FROM budgets;
+  `);
+  const current = await readSettings(db);
+  await writeSettings(db, {
+    ...current,
+    onboardingCompleted: false,
+    biometricEnabled: false,
+    sampleLedger: false,
+    defaultCurrency: "CLP",
+  });
 }
 
 export async function clearSample(db: Database): Promise<void> {

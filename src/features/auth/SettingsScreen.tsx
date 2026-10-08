@@ -2,15 +2,18 @@ import { Button } from "@/components/ui/Button";
 import { Choice } from "@/components/ui/Choice";
 import { usePalette } from "@/components/ui/usePalette";
 import type { CurrencyCode, ThemeMode } from "@/domain/types";
-import { getDatabase, readSettings, writeSettings } from "@/db/database";
+import { getDatabase, readSettings, resetLedger, writeSettings } from "@/db/database";
 import { useClearSample, useRestoreSample } from "@/db/hooks";
 import { useCopy } from "@/i18n/copy";
+import { openShortcutAutomation } from "@/services/shortcuts";
+import { queryClient } from "@/state/queryClient";
 import { useSession } from "@/state/session";
 import { useSplashReplay } from "@/state/splash";
 import * as LocalAuthentication from "expo-local-authentication";
+import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { Text } from "@/components/ui/Text";
-import { Platform, ScrollView, Switch, View } from "react-native";
+import { Alert, Platform, ScrollView, Switch, View } from "react-native";
 
 export function SettingsScreen() {
   const colors = usePalette();
@@ -20,7 +23,9 @@ export function SettingsScreen() {
   const defaultCurrency = useSession((state) => state.defaultCurrency);
   const sampleLedger = useSession((state) => state.sampleLedger);
   const patch = useSession((state) => state.patch);
+  const setUnlocked = useSession((state) => state.setUnlocked);
   const setViewCurrency = useSession((state) => state.setViewCurrency);
+  const router = useRouter();
   const replaySplash = useSplashReplay((state) => state.replay);
   const clear = useClearSample();
   const restore = useRestoreSample();
@@ -40,6 +45,39 @@ export function SettingsScreen() {
     await writeSettings(db, next);
     patch(next);
     if (partial.defaultCurrency) setViewCurrency(partial.defaultCurrency);
+  }
+
+  function confirmReset() {
+    Alert.alert(copy.resetConfirmTitle, copy.resetConfirmBody, [
+      { text: copy.cancel, style: "cancel" },
+      {
+        text: copy.resetConfirm,
+        style: "destructive",
+        onPress: () => {
+          void resetApp();
+        },
+      },
+    ]);
+  }
+
+  async function resetApp() {
+    setError(null);
+    try {
+      const db = await getDatabase();
+      await resetLedger(db);
+      await queryClient.invalidateQueries();
+      patch({
+        onboardingCompleted: false,
+        biometricEnabled: false,
+        sampleLedger: false,
+        defaultCurrency: "CLP",
+      });
+      setViewCurrency("CLP");
+      setUnlocked(true);
+      router.replace("/onboarding");
+    } catch {
+      setError(copy.resetFailed);
+    }
   }
 
   return (
@@ -115,6 +153,14 @@ export function SettingsScreen() {
         <View className="gap-3">
           <Text style={{ color: colors.ink, fontSize: 18, fontWeight: "600" }}>{copy.walletTitle}</Text>
           <Text style={{ color: colors.muted, fontSize: 16, lineHeight: 23 }}>{copy.walletIntro}</Text>
+          <Button
+            label={copy.openShortcuts}
+            onPress={() => {
+              void openShortcutAutomation().then((opened) => {
+                setError(opened ? null : copy.openShortcutsFailed);
+              });
+            }}
+          />
           {copy.walletSteps.map((step, index) => (
             <Text key={step} style={{ color: colors.ink, fontSize: 16, lineHeight: 23 }}>
               {index + 1}. {step}
@@ -124,6 +170,11 @@ export function SettingsScreen() {
         </View>
       ) : null}
       {Platform.OS !== "web" ? <Button label={copy.replaySplash} tone="ghost" onPress={replaySplash} /> : null}
+      <View className="gap-3">
+        <Text style={{ color: colors.ink, fontSize: 18, fontWeight: "600" }}>{copy.resetApp}</Text>
+        <Text style={{ color: colors.muted, fontSize: 16, lineHeight: 23 }}>{copy.resetAppBody}</Text>
+        <Button label={copy.resetApp} tone="ghost" onPress={confirmReset} />
+      </View>
       {error ? <Text style={{ color: colors.expense }}>{error}</Text> : null}
     </ScrollView>
   );
