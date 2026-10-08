@@ -2,6 +2,10 @@
 
 [![ci](https://github.com/CarlosCubillos94/fynn/actions/workflows/ci.yml/badge.svg)](https://github.com/CarlosCubillos94/fynn/actions/workflows/ci.yml)
 
+<p align="center">
+  <img src="docs/cover.png" alt="Fynn: a personal finance app for the phone" width="100%">
+</p>
+
 A personal finance app for the phone. Type `uber 4500` or `almuerzo 8000`, and Fynn suggests a category, keeps the ledger on the device, and tells you in plain language how this week compares with the last.
 
 ## Features
@@ -87,13 +91,22 @@ On a physical phone, use your computer's LAN address instead of `localhost`. Amo
 
 ## Screenshots
 
-Capture the iOS simulator after `npm run ios`:
+<p align="center">
+  <img src="docs/screenshots/onboarding.png" alt="Onboarding: starter budgets from your monthly income" width="200">
+  <img src="docs/screenshots/home.png" alt="Home: typing spotify 4990 suggests Subscriptions" width="200">
+  <img src="docs/screenshots/budgets.png" alt="Budgets per category" width="200">
+  <img src="docs/screenshots/insights.png" alt="Weekly insight and income versus spending" width="200">
+</p>
 
-```bash
-xcrun simctl io booted screenshot docs/home.png
-```
+Onboarding, phrase entry on Home, budgets and the weekly insight. Captured from the web build at a 390×844 phone viewport, with entries typed into the app.
 
 The web build is the live demo: `npm run export:web`, then host the `dist` folder. The host needs `Cross-Origin-Opener-Policy: same-origin` and `Cross-Origin-Embedder-Policy: credentialless` so the on-device database can run in the browser.
+
+To capture the iOS simulator instead, after `npm run ios`:
+
+```bash
+xcrun simctl io booted screenshot docs/screenshots/home.png
+```
 
 ## What I'd build next
 
